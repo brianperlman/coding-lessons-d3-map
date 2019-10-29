@@ -21,6 +21,8 @@
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="https://unpkg.com/topojson@3"></script>
     <script>
+
+
     var svg = d3.select(".container")
         .append("svg")
         .attr("width", "100%")
@@ -40,16 +42,26 @@
         var unemployment = d3.map(data[1], function(d){ return d.id; });
       
         //https://observablehq.com/@d3/choropleth
-        var color = d3.scaleQuantize([1, 10], d3.schemeBlues[9])
+        var color = d3.scaleQuantize()
+          .domain([1, 10])
+          .range(d3.schemeBlues[9])
       
-        //https://github.com/topojson/us-atlas
+        // // //https://github.com/topojson/us-atlas
         var projection = d3.geoAlbersUsa()
             .scale(1300)
             .translate([487.5, 305])
 
+
+        // var projection = d3.geoMercator()
+        //       .scale(500)
+        //       .translate([1500,800])
+         
+
         var path = d3.geoPath()
             .projection(projection);
     
+
+        //drawing county lines
         svg.selectAll("path")
             .data(topojson.feature(data[0], data[0].objects.counties).features)
             .join("path")
@@ -57,12 +69,22 @@
             .attr("stroke", "none")
             .attr("fill", function(d){ if(typeof unemployment.get(d.id) != "undefined") return color(unemployment.get(d.id).rate)});
       
+
+        //drawing state lines
         svg.append("path")
           .datum(topojson.feature(data[0], data[0].objects.states))
           .attr("d", path)
           .attr("fill", "none")
           .attr("stroke", "black")
-          .attr("stroke-width", "0.3px")
+          .attr("stroke-width", "0.3px");
+
+        //berkeley circle
+        svg.append("circle")
+          .attr("cx", projection([-122.26, 37.87])[0])
+          .attr("cy", projection([-122.26, 37.87])[1])
+          .attr("r",5)
+          .attr("fill","deeppink")
+          .attr("fill-opacity",.5)
 
     });
 
